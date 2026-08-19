@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decoupled Student UI</title>
+    <!-- ប្រើប្រាស់ Google Fonts សម្រាប់អក្សរខ្មែរ និងអង់គ្លេស -->
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        /* កំណត់ពណ៌គោល */
+        :root {
+            --primary-color: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg-color: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --border-color: #e5e7eb;
+        }
+
+        body {
+            font-family: 'Inter', 'Battambang', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* ប្រអប់ផ្ទុកទិន្នន័យ (Card) */
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* ផ្នែកខាងលើ (ចំណងជើង និងប៊ូតុង) */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--bg-color);
+        }
+
+        h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: var(--text-main);
+        }
+
+        /* រចនាប៊ូតុង */
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: 'Inter', 'Battambang', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 6px rgba(79, 70, 229, 0.2);
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        button:disabled {
+            background-color: var(--text-muted);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* រចនាតារាង */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: #f8fafc;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background-color: #f1f5f9;
+        }
+
+        /* រចនា Badge សម្រាប់ GPA */
+        .gpa-badge {
+            background: #e0e7ff;
+            color: #4338ca;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        /* សារបង្ហាញស្ថានភាព */
+        .status-message {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+        
+        .error-message {
+            color: #dc2626;
+            background-color: #fee2e2;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>បញ្ជីរាយនាមនិស្សិត</h2>
+            <button id="btnLoad">
+                <!-- Icon ទាញយក -->
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                </svg>
+                ទាញយកទិន្នន័យ
+            </button>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>ឈ្មោះពេញ</th>
+                    <th>ភេទ</th>
+                    <th>GPA</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <tr>
+                    <td colspan="4" class="status-message">មិនទាន់មានទិន្នន័យ សូមចុចប៊ូតុងខាងលើ ដើម្បីទាញយក។</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        const apiUrl = 'http://localhost:5260/api/StudentApi';
+        const btnLoad = document.getElementById('btnLoad');
+        const tbody = document.getElementById('tableBody');
+        const originalBtnHTML = btnLoad.innerHTML;
+
+        btnLoad.addEventListener('click', async () => {
+            // ១. បង្ហាញស្ថានភាពកំពុងដំណើរការ (Loading State)
+            btnLoad.innerHTML = 'កំពុងដំណើរការ...';
+            btnLoad.disabled = true;
+            tbody.innerHTML = '<tr><td colspan="4" class="status-message">កំពុងទាញយកទិន្នន័យពី Server...</td></tr>';
+
+            try {
+                // ២. ហៅ API
+                const response = await fetch(apiUrl);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const students = await response.json();
+                tbody.innerHTML = ''; // សំអាតទិន្នន័យចាស់
+
+                // ៣. បង្ហាញករណីគ្មានទិន្នន័យ
+                if (students.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="status-message">មិនមានទិន្នន័យនិស្សិតឡើយ។</td></tr>';
+                    return;
+                }
+
+                // ៤. បញ្ចូលទិន្នន័យទៅក្នុងតារាង
+                students.forEach(s => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>#${s.id}</td>
+                            <td><strong>${s.fullName}</strong></td>
+                            <td>${s.gender}</td>
+                            <td><span class="gpa-badge">${s.gpa}</span></td>
+                        </tr>`;
+                });
+            } catch (err) {
+                console.error('API Error:', err);
+                tbody.innerHTML = `<tr><td colspan="4" class="status-message error-message">មានបញ្ហាក្នុងការភ្ជាប់ទៅកាន់ Server ៖ សូមពិនិត្យមើល API របស់អ្នក។</td></tr>`;
+            } finally {
+                // ៥. ត្រឡប់ប៊ូតុងទៅសភាពដើមវិញទោះជោគជ័យ ឬបរាជ័យ
+                btnLoad.innerHTML = originalBtnHTML;
+                btnLoad.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
