@@ -12,6 +12,7 @@
             <th>ឈ្មោះពេញ (Full Name)</th>
             <th>ភេទ (Gender)</th>
             <th>មធ្យមភាគ (GPA)</th>
+            <th>សកម្មភាព (Actions)</th>
         </tr>
     </thead>
     <tbody>
@@ -23,6 +24,14 @@
                 <td>@item.FullName</td>
                 <td>@item.Gender</td>
                 <td>@item.GPA.ToString("0.00")</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary btn-sm">
+                        <i class="fa-solid fa-pen-to-square me-1"></i> កែប្រែ
+                    </a>
+                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm">
+                        <i class="fa-solid fa-trash me-1"></i> លុប
+                    </a>
+                </td>
             </tr>
         }
     </tbody>

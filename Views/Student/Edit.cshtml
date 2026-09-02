@@ -1,0 +1,40 @@
+@model SchoolApp.Models.Student
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "_Layout";
+}
+<h2>កែប្រែទិន្នន័យនិស្សិត</h2>
+
+<form asp-action="Edit" asp-route-id="@Model.Id" method="post">
+    
+    <!-- សំខាន់បំផុត៖ ត្រូវលាក់ Id! បើគ្មានកូដមួយបន្ទាត់នេះទេ EF Core នឹង Error -->
+    <input type="hidden" asp-for="Id" />
+
+    <div class="form-group mb-3">
+        <label asp-for="FullName">ឈ្មោះពេញ៖</label>
+        <!-- ទិន្នន័យចាស់នឹងលោតចូលក្នុងប្រអប់នេះដោយស្វ័យប្រវត្តិ -->
+        <input asp-for="FullName" class="form-control" />
+        <span asp-validation-for="FullName" class="text-danger"></span>
+    </div>
+
+    <!-- បន្ថែមប្រអប់សម្រាប់ Gender ឲ្យស្របតាម Model -->
+    <div class="form-group mb-3">
+        <label asp-for="Gender">ភេទ៖</label>
+        <select asp-for="Gender" class="form-control">
+            <option value="">-- សូមជ្រើសរើសភេទ --</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+        </select>
+        <span asp-validation-for="Gender" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mb-3">
+        <label asp-for="GPA">GPA៖</label>
+        <!-- បន្ថែម type="number" និង step="0.01" ដើម្បីងាយស្រួលវាយបញ្ចូលលេខទសភាគ -->
+        <input asp-for="GPA" class="form-control" type="number" step="0.01" />
+        <!-- បន្ថែម Validation សម្រាប់បង្ហាញ Error Message របស់ GPA -->
+        <span asp-validation-for="GPA" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-2">កែប្រែទិន្នន័យ (Update)</button>
+</form>
