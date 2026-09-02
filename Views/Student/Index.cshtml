@@ -3,6 +3,30 @@
 }
 @model IEnumerable<SchoolApp.Models.Student>
 
+@section Scripts {
+    <script>
+        function confirmDelete(e, url) {
+            e.preventDefault(); // ឃាត់មិនឲ្យ Link ដំណើរការភ្លាមៗ
+
+            Swal.fire({
+                title: 'តើអ្នកពិតជាចង់លុបមែនទេ?',
+                text: "ទិន្នន័យនេះនឹងត្រូវលុបចោលទាំងស្រុង ហើយមិនអាចទាញត្រឡប់មកវិញបានទេ!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33', // ពណ៌ក្រហមសម្រាប់ប៊ូតុងលុប
+                cancelButtonColor: '#3085d6', // ពណ៌ខៀវសម្រាប់ប៊ូតុងបោះបង់
+                confirmButtonText: 'បាទ/ចាស, លុបវា!',
+                cancelButtonText: 'បោះបង់'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // ប្រសិនបើអ្នកប្រើប្រាស់ចុច យល់ព្រម វានឹងបញ្ជូនទៅកាន់ URL លុប
+                    window.location.href = url; 
+                }
+            })
+        }
+    </script>
+}
+
 <h2>បញ្ជីរាយនាមនិស្សិត (Traditional Razor View)</h2>
 
 <table class="table table-bordered">
@@ -28,7 +52,7 @@
                     <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary btn-sm">
                         <i class="fa-solid fa-pen-to-square me-1"></i> កែប្រែ
                     </a>
-                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm">
+                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm" onclick="return confirmDelete(event, this.href);">
                         <i class="fa-solid fa-trash me-1"></i> លុប
                     </a>
                 </td>

@@ -3,19 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Decoupled Student UI</title>
-    <!-- ប្រើប្រាស់ Google Fonts សម្រាប់អក្សរខ្មែរ និងអង់គ្លេស -->
-    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <title>គ្រប់គ្រងទិន្នន័យនិស្សិត (CRUD)</title>
+    <!-- Google Fonts សម្រាប់អក្សរខ្មែរ និងអង់គ្លេស -->
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- FontAwesome សម្រាប់ Icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    
     <style>
-        /* កំណត់ពណ៌គោល */
         :root {
-            --primary-color: #4f46e5;
+            --primary: #4f46e5;
             --primary-hover: #4338ca;
+            --danger: #dc2626;
+            --danger-hover: #b91c1c;
+            --success: #16a34a;
+            --warning: #ca8a04;
             --bg-color: #f3f4f6;
             --card-bg: #ffffff;
             --text-main: #1f2937;
             --text-muted: #6b7280;
-            --border-color: #e5e7eb;
+            --border: #e5e7eb;
         }
 
         body {
@@ -23,98 +31,138 @@
             background-color: var(--bg-color);
             color: var(--text-main);
             margin: 0;
-            padding: 40px 20px;
+            padding: 30px 20px;
             display: flex;
             justify-content: center;
         }
 
-        /* ប្រអប់ផ្ទុកទិន្នន័យ (Card) */
-        .container {
-            max-width: 900px;
+        .main-container {
+            max-width: 1200px;
             width: 100%;
-            background: var(--card-bg);
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 24px;
         }
 
-        /* ផ្នែកខាងលើ (ចំណងជើង និងប៊ូតុង) */
-        .header {
+        /* Responsive: បើអេក្រង់តូច ទម្លាក់ឱ្យនៅពីលើគ្នា */
+        @media (max-width: 768px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            height: fit-content;
+        }
+
+        .card-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid var(--bg-color);
         }
 
-        h2 {
+        h2, h3 {
             margin: 0;
-            font-size: 1.5rem;
             color: var(--text-main);
         }
 
-        /* រចនាប៊ូតុង */
-        button {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 10px 20px;
+        /* ---------------- Form Design ---------------- */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-family: 'Inter', 'Battambang', sans-serif;
+            font-size: 0.95rem;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        /* ---------------- Button Design ---------------- */
+        .btn {
+            padding: 10px 16px;
             border-radius: 8px;
             font-size: 0.95rem;
             font-family: 'Inter', 'Battambang', sans-serif;
             cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
+            border: none;
+            display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 8px;
-            box-shadow: 0 4px 6px rgba(79, 70, 229, 0.2);
+            transition: all 0.2s;
+            font-weight: 500;
         }
 
-        button:hover {
-            background-color: var(--primary-hover);
-            transform: translateY(-1px);
+        .btn-primary { background-color: var(--primary); color: white; }
+        .btn-primary:hover { background-color: var(--primary-hover); }
+        
+        .btn-secondary { background-color: #e5e7eb; color: var(--text-main); }
+        .btn-secondary:hover { background-color: #d1d5db; }
+
+        .btn-sm { padding: 6px 12px; font-size: 0.85rem; border-radius: 6px; }
+        .btn-warning { background-color: #fef08a; color: #854d0e; }
+        .btn-warning:hover { background-color: #fde047; }
+        .btn-danger { background-color: #fee2e2; color: var(--danger); }
+        .btn-danger:hover { background-color: #fecaca; }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .form-actions .btn { flex: 1; }
+
+        /* ---------------- Table Design ---------------- */
+        .table-responsive {
+            overflow-x: auto;
         }
 
-        button:disabled {
-            background-color: var(--text-muted);
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        /* រចនាតារាង */
         table {
             width: 100%;
             border-collapse: collapse;
-            background-color: var(--card-bg);
-            border-radius: 8px;
-            overflow: hidden;
         }
 
         th, td {
-            padding: 16px;
+            padding: 14px 16px;
             text-align: left;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border);
         }
 
         th {
             background-color: #f8fafc;
-            font-weight: 600;
             color: var(--text-muted);
-            text-transform: uppercase;
+            font-weight: 600;
             font-size: 0.85rem;
-            letter-spacing: 0.05em;
+            text-transform: uppercase;
         }
 
-        tr:last-child td {
-            border-bottom: none;
-        }
+        tr:hover td { background-color: #f8fafc; }
 
-        tr:hover td {
-            background-color: #f1f5f9;
-        }
-
-        /* រចនា Badge សម្រាប់ GPA */
         .gpa-badge {
             background: #e0e7ff;
             color: #4338ca;
@@ -124,99 +172,270 @@
             font-weight: 600;
         }
 
-        /* សារបង្ហាញស្ថានភាព */
-        .status-message {
-            text-align: center;
-            padding: 30px;
-            color: var(--text-muted);
-            font-size: 0.95rem;
+        .actions-cell {
+            display: flex;
+            gap: 8px;
         }
-        
-        .error-message {
-            color: #dc2626;
-            background-color: #fee2e2;
-            border-radius: 8px;
-        }
+
+        .text-center { text-align: center; }
+        .empty-state { padding: 40px; color: var(--text-muted); }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h2>បញ្ជីរាយនាមនិស្សិត</h2>
-            <button id="btnLoad">
-                <!-- Icon ទាញយក -->
-                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                </svg>
-                ទាញយកទិន្នន័យ
-            </button>
+
+    <div class="main-container">
+        
+        <!-- ផ្នែកខាងឆ្វេង: Form សម្រាប់បង្កើត និងកែប្រែ -->
+        <div class="card">
+            <div class="card-header">
+                <h3 id="formTitle">បញ្ចូលនិស្សិតថ្មី</h3>
+            </div>
+            
+            <form id="studentForm">
+                <!-- លាក់ ID សម្រាប់សម្គាល់ថាជាការបង្កើតថ្មី (ទទេ) ឬ កែប្រែ (មានលេខ) -->
+                <input type="hidden" id="studentId">
+
+                <div class="form-group">
+                    <label for="fullName">ឈ្មោះពេញ៖</label>
+                    <input type="text" id="fullName" placeholder="ឧ. សុខ សាន្ត" required autocomplete="off">
+                </div>
+
+                <div class="form-group">
+                    <label for="gender">ភេទ៖</label>
+                    <select id="gender" required>
+                        <option value="">-- ជ្រើសរើសភេទ --</option>
+                        <option value="ប្រុស">ប្រុស</option>
+                        <option value="ស្រី">ស្រី</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="gpa">ពិន្ទុ GPA៖</label>
+                    <input type="number" id="gpa" step="0.01" min="0" max="4" placeholder="ឧ. 3.5" required>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" id="btnSave">
+                        <i class="fa-solid fa-floppy-disk"></i> រក្សាទុក
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="resetForm()" id="btnCancel" style="display: none;">
+                        <i class="fa-solid fa-xmark"></i> បោះបង់
+                    </button>
+                </div>
+            </form>
         </div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>ឈ្មោះពេញ</th>
-                    <th>ភេទ</th>
-                    <th>GPA</th>
-                </tr>
-            </thead>
-            <tbody id="tableBody">
-                <tr>
-                    <td colspan="4" class="status-message">មិនទាន់មានទិន្នន័យ សូមចុចប៊ូតុងខាងលើ ដើម្បីទាញយក។</td>
-                </tr>
-            </tbody>
-        </table>
+        <!-- ផ្នែកខាងស្តាំ: តារាងបង្ហាញទិន្នន័យ -->
+        <div class="card">
+            <div class="card-header">
+                <h2>បញ្ជីរាយនាមនិស្សិត</h2>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="loadStudents()">
+                    <i class="fa-solid fa-rotate-right"></i> Refresh
+                </button>
+            </div>
+
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>ឈ្មោះពេញ</th>
+                            <th>ភេទ</th>
+                            <th>GPA</th>
+                            <th>សកម្មភាព</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <tr>
+                            <td colspan="5" class="text-center empty-state">
+                                <i class="fa-solid fa-spinner fa-spin"></i> កំពុងទាញយកទិន្នន័យ...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
     </div>
 
+    <!-- ភ្ជាប់ SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
-        const apiUrl = 'http://localhost:5260/api/StudentApi';
-        const btnLoad = document.getElementById('btnLoad');
-        const tbody = document.getElementById('tableBody');
-        const originalBtnHTML = btnLoad.innerHTML;
+        const apiUrl = 'http://localhost:5260/api/StudentApi'; 
+        
+        // ដំណើរការពេលបើក Page ភ្លាម
+        document.addEventListener('DOMContentLoaded', loadStudents);
 
-        btnLoad.addEventListener('click', async () => {
-            // ១. បង្ហាញស្ថានភាពកំពុងដំណើរការ (Loading State)
-            btnLoad.innerHTML = 'កំពុងដំណើរការ...';
-            btnLoad.disabled = true;
-            tbody.innerHTML = '<tr><td colspan="4" class="status-message">កំពុងទាញយកទិន្នន័យពី Server...</td></tr>';
-
+        // ១. Read - ទាញយកទិន្នន័យមកបង្ហាញ
+        async function loadStudents() {
+            const tbody = document.getElementById('tableBody');
+            
             try {
-                // ២. ហៅ API
                 const response = await fetch(apiUrl);
+                if (!response.ok) throw new Error('Network response was not ok');
                 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-
                 const students = await response.json();
-                tbody.innerHTML = ''; // សំអាតទិន្នន័យចាស់
+                tbody.innerHTML = '';
 
-                // ៣. បង្ហាញករណីគ្មានទិន្នន័យ
                 if (students.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="4" class="status-message">មិនមានទិន្នន័យនិស្សិតឡើយ។</td></tr>';
+                    tbody.innerHTML = `<tr><td colspan="5" class="text-center empty-state">មិនទាន់មានទិន្នន័យនិស្សិតឡើយ។ សូមបញ្ចូលទិន្នន័យថ្មី!</td></tr>`;
                     return;
                 }
 
-                // ៤. បញ្ចូលទិន្នន័យទៅក្នុងតារាង
                 students.forEach(s => {
+                    // ប្រែក្លាយទិន្នន័យ Object ទៅជា JSON string ដើម្បីបោះចូលកូដ HTML ងាយស្រួលពេល Edit
+                    const studentJson = JSON.stringify(s).replace(/"/g, '&quot;');
+                    
                     tbody.innerHTML += `
                         <tr>
                             <td>#${s.id}</td>
                             <td><strong>${s.fullName}</strong></td>
                             <td>${s.gender}</td>
-                            <td><span class="gpa-badge">${s.gpa}</span></td>
+                            <td><span class="gpa-badge">${s.gpa.toFixed(2)}</span></td>
+                            <td class="actions-cell">
+                                <button class="btn btn-warning btn-sm" onclick="editStudent(${studentJson})">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </button>
+                                <button class="btn btn-danger btn-sm" onclick="confirmDelete(${s.id})">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </td>
                         </tr>`;
                 });
             } catch (err) {
-                console.error('API Error:', err);
-                tbody.innerHTML = `<tr><td colspan="4" class="status-message error-message">មានបញ្ហាក្នុងការភ្ជាប់ទៅកាន់ Server ៖ សូមពិនិត្យមើល API របស់អ្នក។</td></tr>`;
+                console.error(err);
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center empty-state" style="color:red;">មានបញ្ហាក្នុងការភ្ជាប់ទៅកាន់ Server (សូមពិនិត្យមើល API របស់អ្នក)</td></tr>`;
+            }
+        }
+
+        // ២. Create & Update - ពេលចុច Submit Form
+        document.getElementById('studentForm').addEventListener('submit', async function(e) {
+            e.preventDefault(); // ទប់កុំឲ្យ Refresh Page
+            
+            const btnSave = document.getElementById('btnSave');
+            const originalBtnText = btnSave.innerHTML;
+            btnSave.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> កំពុងរក្សាទុក...';
+            btnSave.disabled = true;
+
+            const id = document.getElementById('studentId').value;
+            const student = {
+                fullName: document.getElementById('fullName').value,
+                gender: document.getElementById('gender').value,
+                gpa: parseFloat(document.getElementById('gpa').value)
+            };
+
+            // បើមាន ID គឺ Update បើគ្មាន ID គឺ Create
+            if (id) {
+                student.id = parseInt(id); 
+            }
+
+            try {
+                let response;
+                if (id) {
+                    // ដំណើរការ PUT (Update)
+                    response = await fetch(`${apiUrl}/${id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(student)
+                    });
+                } else {
+                    // ដំណើរការ POST (Create)
+                    response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(student)
+                    });
+                }
+
+                if (response.ok) {
+                    // បង្ហាញសារជោគជ័យ
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'ជោគជ័យ!',
+                        text: id ? 'កែប្រែទិន្នន័យបានសម្រេច!' : 'បញ្ចូលនិស្សិតថ្មីបានសម្រេច!',
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true
+                    });
+                    
+                    resetForm();
+                    loadStudents(); // ទាញទិន្នន័យមកបង្ហាញម្តងទៀត
+                } else {
+                    const errText = await response.text();
+                    Swal.fire('បរាជ័យ!', `មានបញ្ហាក្នុងការរក្សាទុក៖ ${errText}`, 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                Swal.fire('បរាជ័យ!', 'មិនអាចភ្ជាប់ទៅកាន់ Server បានទេ។', 'error');
             } finally {
-                // ៥. ត្រឡប់ប៊ូតុងទៅសភាពដើមវិញទោះជោគជ័យ ឬបរាជ័យ
-                btnLoad.innerHTML = originalBtnHTML;
-                btnLoad.disabled = false;
+                btnSave.innerHTML = originalBtnText;
+                btnSave.disabled = false;
             }
         });
+
+        // ៣. បំពេញទិន្នន័យចូល Form ពេលចុចប៊ូតុង Edit
+        function editStudent(student) {
+            document.getElementById('formTitle').innerText = "កែប្រែទិន្នន័យនិស្សិត";
+            document.getElementById('studentId').value = student.id;
+            document.getElementById('fullName').value = student.fullName;
+            document.getElementById('gender').value = student.gender;
+            document.getElementById('gpa').value = student.gpa;
+            
+            document.getElementById('btnCancel').style.display = 'inline-flex';
+            document.getElementById('btnSave').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> កែប្រែ (Update)';
+            
+            // Focus ទៅលើ Form (ល្អសម្រាប់អេក្រង់ទូរស័ព្ទ)
+            document.getElementById('fullName').focus();
+        }
+
+        // ៤. Delete - ពេលចុចប៊ូតុងលុប (ភ្ជាប់ជាមួយ SweetAlert2)
+        function confirmDelete(id) {
+            Swal.fire({
+                title: 'តើអ្នកពិតជាចង់លុបមែនទេ?',
+                text: "ទិន្នន័យរបស់និស្សិតនេះនឹងត្រូវលុបចោលទាំងស្រុង!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'បាទ/ចាស, លុបវា!',
+                cancelButtonText: 'បោះបង់'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        const response = await fetch(`${apiUrl}/${id}`, {
+                            method: 'DELETE'
+                        });
+
+                        if (response.ok) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'បានលុប!',
+                                text: 'ទិន្នន័យត្រូវបានលុបដោយជោគជ័យ។',
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
+                            loadStudents(); // ទាញទិន្នន័យមកបង្ហាញសាជាថ្មី
+                        } else {
+                            Swal.fire('បរាជ័យ!', 'មិនអាចលុបទិន្នន័យនេះបានទេ។', 'error');
+                        }
+                    } catch (err) {
+                        Swal.fire('បរាជ័យ!', 'មិនអាចភ្ជាប់ទៅកាន់ Server បានទេ។', 'error');
+                    }
+                }
+            });
+        }
+
+        // សំអាត Form ឱ្យនៅទទេវិញ
+        function resetForm() {
+            document.getElementById('studentForm').reset();
+            document.getElementById('studentId').value = '';
+            document.getElementById('formTitle').innerText = "បញ្ចូលនិស្សិតថ្មី";
+            document.getElementById('btnCancel').style.display = 'none';
+            document.getElementById('btnSave').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> រក្សាទុក';
+        }
     </script>
 </body>
 </html>

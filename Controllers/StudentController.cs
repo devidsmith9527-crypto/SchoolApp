@@ -82,5 +82,35 @@ namespace SchoolApp.Controllers
             // បើកែខុស Validation, បញ្ជូន Form មកឱ្យកែប្រែឡើងវិញ
             return View(model); 
         }
+
+        // ១. [HttpGet] Delete - បង្ហាញទំព័រសួរបញ្ជាក់
+        [HttpGet("Delete/{id}")]
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null) return NotFound();
+
+            var student = await _context.Students.FindAsync(id);
+            if (student == null) return NotFound();
+
+            return View(student); // បង្ហាញឯកសារ Delete.cshtml
+        }
+
+        // ២. [HttpPost] DeleteConfirmed - ទទួលការបញ្ជាក់ ទើបលុបពិតប្រាកដ
+        // ចំណាំ៖ យើងប្រើ ActionName("Delete") ដើម្បីឱ្យវាត្រូវគ្នានឹង URL ខាងលើ
+        [HttpPost, ActionName("Delete"), Route("DeleteConfirmed/{id}")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            // រកទិន្នន័យនោះឱ្យឃើញសិន
+            var student = await _context.Students.FindAsync(id);
+            if (student != null)
+            {
+                // បញ្ជាឱ្យ EF Core លុបចេញពី Database
+                _context.Students.Remove(student);
+                await _context.SaveChangesAsync();
+            }
+            
+            return RedirectToAction(nameof(Index));
+        }
     }
 }
