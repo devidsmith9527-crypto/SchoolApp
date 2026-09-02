@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SchoolApp.Data;
+using SchoolApp.Models;
 
 namespace SchoolApp.Controllers
 {
@@ -23,6 +24,31 @@ namespace SchoolApp.Controllers
 
             // ២. បោះទិន្នន័យ Model ទៅឱ្យ Razor View (.cshtml)
             return View(students);
+        }
+
+        // ១. GET: /Student/Create (បង្ហាញ Form ទទេ)
+        [HttpGet("Create")]
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        // ២. POST: /Student/Create (ទទួលទិន្នន័យមក Save)
+        [HttpPost("Create")]
+        [ValidateAntiForgeryToken] // ការពារការវាយប្រហារ CSRF
+        public async Task<IActionResult> Create(Student model)
+        {
+            // ឆែកមើល Validation តាម Model Rules
+            if (!ModelState.IsValid)
+            {
+                return View(model); // បើខុស បង្ហាញ Form វិញអមជាមួយ Error
+            }
+
+            await _context.Students.AddAsync(model);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "រក្សាទុកទិន្នន័យសិស្សជោគជ័យ!";
+            return RedirectToAction(nameof(Index)); // 302 Redirect ទៅទំព័របញ្ជី
         }
     }
 }

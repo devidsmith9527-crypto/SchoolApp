@@ -1,0 +1,48 @@
+@model SchoolApp.Models.Student
+@{ ViewData["Title"] = "បន្ថែមនិស្សិតថ្មី"; }
+
+<div class="container mt-3" style="max-width: 600px;">
+    <div class="card shadow-sm border-0 rounded-3">
+        <div class="card-header bg-success text-white p-3 d-flex align-items-center justify-content-between">
+            <h5 class="m-0 font-khmer fw-bold">
+                <i class="fa-solid fa-user-plus me-2"></i>បន្ថែមនិស្សិតថ្មី (Traditional MVC)
+            </h5>
+            <a asp-action="Index" class="btn btn-sm btn-light text-success fw-bold">
+                <i class="fa-solid fa-arrow-left me-1"></i>ត្រឡប់ក្រោយ
+            </a>
+        </div>
+        <div class="card-body p-4">
+            <form asp-action="Create" method="post">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger p-2 mb-3 d-none"></div>
+
+                <div class="mb-3">
+                    <label asp-for="FullName" class="form-label fw-bold text-dark">ឈ្មោះពេញនិស្សិត</label>
+                    <input asp-for="FullName" class="form-control" placeholder="ឧ. សុខ ចាន់នី" />
+                    <span asp-validation-for="FullName" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Gender" class="form-label fw-bold text-dark">ភេទ</label>
+                    <select asp-for="Gender" class="form-select">
+                        <option value="">-- ជ្រើសរើសភេទ --</option>
+                        <option value="ប្រុស">ប្រុស (Male)</option>
+                        <option value="ស្រី">ស្រី (Female)</option>
+                    </select>
+                    <span asp-validation-for="Gender" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="GPA" class="form-label fw-bold text-dark">GPA</label>
+                    <input asp-for="GPA" type="number" step="0.01" class="form-control" placeholder="0.00 - 4.00" />
+                    <span asp-validation-for="GPA" class="text-danger small"></span>
+                </div>
+
+                <button type="submit" class="btn btn-success w-100 fw-bold py-2">
+                    <i class="fa-solid fa-floppy-disk me-1"></i> រក្សាទុកទិន្នន័យ (Submit Form)
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }
