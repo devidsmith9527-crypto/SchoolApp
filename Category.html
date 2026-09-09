@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>គ្រប់គ្រងទិន្នន័យ Category & Product</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    
+    <style>
+        body { background-color: #f8f9fa; font-family: 'Khmer OS Battambang', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .card { box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: none; border-radius: 10px; }
+        .table-hover tbody tr:hover { background-color: #f1f3f5; transition: 0.3s; }
+        .btn-action { margin-right: 5px; margin-bottom: 5px; }
+        .table-container { min-height: 300px; }
+        .category-badge { font-size: 0.9em; padding: 5px 10px; border-radius: 5px; background: #e9ecef; }
+    </style>
+</head>
+<body>
+
+<div class="container mt-5">
+    <h2 class="text-center mb-4 fw-bold text-primary"><i class="fas fa-store"></i> ប្រព័ន្ធគ្រប់គ្រងទិន្នន័យ (API CRUD)</h2>
+
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active fw-bold" id="category-tab" data-bs-toggle="tab" data-bs-target="#category" type="button" role="tab"><i class="fas fa-tags"></i> គ្រប់គ្រងប្រភេទ (Categories)</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-bold" id="product-tab" data-bs-toggle="tab" data-bs-target="#product" type="button" role="tab"><i class="fas fa-box"></i> គ្រប់គ្រងផលិតផល (Products)</button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="myTabContent">
+        
+        <!-- Category Tab -->
+        <div class="tab-pane fade show active p-3 bg-white border border-top-0 rounded-bottom table-container" id="category" role="tabpanel">
+            <div class="d-flex justify-content-between mb-3">
+                <h4 class="text-secondary">បញ្ជីប្រភេទ (Categories)</h4>
+                <button class="btn btn-success" onclick="openCategoryModal()"><i class="fas fa-plus"></i> បន្ថែមប្រភេទថ្មី</button>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover text-center align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th width="10%">ID</th>
+                            <th width="45%">ឈ្មោះប្រភេទ (Name)</th>
+                            <th width="45%">សកម្មភាព (Actions)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="categoryTableBody">
+                        <tr><td colspan="3" class="text-muted"><div class="spinner-border spinner-border-sm"></div> កំពុងទាញទិន្នន័យ...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Product Tab -->
+        <div class="tab-pane fade p-3 bg-white border border-top-0 rounded-bottom table-container" id="product" role="tabpanel">
+            <div class="d-flex justify-content-between mb-3">
+                <h4 class="text-secondary">បញ្ជីផលិតផល (Products)</h4>
+                <!-- ដកប៊ូតុងបន្ថែមផលិតផលទូទៅចេញ ព្រោះយើងចង់ឲ្យបន្ថែមតាមរយៈ Category -->
+                <span class="text-muted small"><i class="fas fa-info-circle"></i> សូមចូលទៅកាន់ Tab "ប្រភេទ" ដើម្បីបន្ថែមផលិតផលថ្មីចូលទៅក្នុងប្រភេទនីមួយៗ។</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover text-center align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th width="10%">ID</th>
+                            <th width="30%">ឈ្មោះផលិតផល (Name)</th>
+                            <th width="15%">Category ID</th>
+                            <th width="15%">តម្លៃ (Price)</th>
+                            <th width="30%">សកម្មភាព (Actions)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productTableBody">
+                        <tr><td colspan="5" class="text-muted"><div class="spinner-border spinner-border-sm"></div> កំពុងទាញទិន្នន័យ...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Modal Category -->
+<div class="modal fade" id="categoryModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="categoryModalTitle">បន្ថែមប្រភេទថ្មី</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="categoryId">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">ឈ្មោះប្រភេទ <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="categoryName" placeholder="បញ្ចូលឈ្មោះប្រភេទ">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">បិទ</button>
+                <button type="button" class="btn btn-primary" id="btnSaveCategory" onclick="saveCategory()">រក្សាទុក</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Product (Upgraded) -->
+<div class="modal fade" id="productModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="productModalTitle">បន្ថែមផលិតផលថ្មី</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="productId">
+                
+                <!-- ផ្នែកថ្មីដែលបានបន្ថែម: Label CategoryName និង Hidden CategoryID -->
+                <div class="mb-3 bg-light p-2 rounded border">
+                    <label class="form-label text-muted mb-0">ប្រភេទផលិតផល៖ 
+                        <strong id="displayCategoryName" class="text-primary fs-5">មិនទាន់ជ្រើសរើស</strong>
+                    </label>
+                    <input type="hidden" id="hiddenCategoryID" name="category_id" value="">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">ឈ្មោះផលិតផល <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="productName" placeholder="បញ្ចូលឈ្មោះផលិតផល">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">តម្លៃ ($) <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" id="productPrice" placeholder="ឧ. 10.50" min="0" step="0.01">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">បិទ</button>
+                <button type="button" class="btn btn-primary" id="btnSaveProduct" onclick="saveProduct()">រក្សាទុក</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+
+<script>
+    // URL របស់ API (ប្តូរ Port តាមជាក់ស្តែង)
+    const categoryApiUrl = 'http://localhost:5260/api/CategoryApi';
+    const productApiUrl = 'http://localhost:5260/api/ProductApi';
+
+    let categoryModal, productModal;
+
+    document.addEventListener("DOMContentLoaded", () => {
+        categoryModal = new bootstrap.Modal(document.getElementById('categoryModal'));
+        productModal = new bootstrap.Modal(document.getElementById('productModal'));
+        loadCategories();
+        loadProducts();
+    });
+
+    function toggleButtonLoading(buttonId, isLoading) {
+        let btn = document.getElementById(buttonId);
+        if (isLoading) {
+            btn.disabled = true;
+            btn.dataset.originalText = btn.innerHTML;
+            btn.innerHTML = `<span class="spinner-border spinner-border-sm"></span> កំពុងដំណើរការ...`;
+        } else {
+            btn.disabled = false;
+            btn.innerHTML = btn.dataset.originalText || 'រក្សាទុក';
+        }
+    }
+
+    /* ==============================================
+       ផ្នែក Category
+    ============================================== */
+    async function loadCategories() {
+        let tbody = document.getElementById('categoryTableBody');
+        try {
+            let res = await fetch(categoryApiUrl);
+            if (res.status === 404 || res.status === 204) {
+                tbody.innerHTML = `<tr><td colspan="3" class="text-warning fw-bold">មិនមានទិន្នន័យប្រភេទនៅឡើយទេ!</td></tr>`;
+                return;
+            }
+            if (!res.ok) throw new Error("មិនអាចទាញទិន្នន័យពី Server បានទេ");
+
+            let data = await res.json();
+            tbody.innerHTML = '';
+            
+            if(data.length === 0){
+                tbody.innerHTML = `<tr><td colspan="3" class="text-muted">ទិន្នន័យទទេ</td></tr>`;
+                return;
+            }
+
+            data.forEach(item => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="fw-bold text-secondary">${item.categoryId}</td>
+                        <td class="text-start fw-bold fs-6 text-dark">${item.categoryName}</td>
+                        <td>
+                            <!-- ប៊ូតុងបន្ថែមផលិតផលចូលទៅក្នុង Category នេះ -->
+                            <button class="btn btn-sm btn-outline-success btn-action" onclick="openProductModalWithCategory(${item.categoryId}, '${item.categoryName.replace(/'/g, "\\'")}')">
+                                <i class="fas fa-plus"></i> ផលិតផល
+                            </button>
+                            <button class="btn btn-sm btn-outline-warning btn-action" onclick="editCategory(${item.categoryId})">
+                                <i class="fas fa-edit"></i> កែប្រែ
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger btn-action" onclick="deleteCategory(${item.categoryId})">
+                                <i class="fas fa-trash"></i> លុប
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        } catch (error) { 
+            tbody.innerHTML = `<tr><td colspan="3" class="text-danger"><i class="fas fa-exclamation-triangle"></i> បញ្ហាការតភ្ជាប់: ${error.message}</td></tr>`;
+        }
+    }
+
+    function openCategoryModal() {
+        document.getElementById('categoryId').value = '';
+        document.getElementById('categoryName').value = '';
+        document.getElementById('categoryModalTitle').innerText = 'បន្ថែមប្រភេទថ្មី';
+        document.getElementById('categoryName').classList.remove('is-invalid');
+        categoryModal.show();
+    }
+
+    async function saveCategory() {
+        let id = document.getElementById('categoryId').value;
+        let nameInput = document.getElementById('categoryName');
+        let name = nameInput.value.trim();
+        
+        if (!name) {
+            nameInput.classList.add('is-invalid');
+            Swal.fire('បម្រាម!', 'សូមបញ្ចូលឈ្មោះប្រភេទ!', 'warning');
+            return;
+        } else {
+            nameInput.classList.remove('is-invalid');
+        }
+
+        toggleButtonLoading('btnSaveCategory', true);
+
+        let method = id ? 'PUT' : 'POST';
+        let url = id ? `${categoryApiUrl}/${id}` : categoryApiUrl;
+        let payload = { categoryName: name };
+        if (id) payload.categoryId = parseInt(id);
+
+        try {
+            let res = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                Swal.fire({ icon: 'success', title: 'ជោគជ័យ!', text: 'ទិន្នន័យត្រូវបានរក្សាទុក', timer: 1500, showConfirmButton: false });
+                categoryModal.hide();
+                loadCategories();
+            } else {
+                throw new Error("ប្រតិបត្តិការបរាជ័យ");
+            }
+        } catch (error) {
+            Swal.fire('បរាជ័យ!', 'មានបញ្ហាក្នុងការភ្ជាប់ទៅកាន់ Server។', 'error');
+        } finally {
+            toggleButtonLoading('btnSaveCategory', false);
+        }
+    }
+
+    async function editCategory(id) {
+        try {
+            let res = await fetch(`${categoryApiUrl}/${id}`);
+            if(res.ok){
+                let data = await res.json();
+                document.getElementById('categoryId').value = data.categoryId;
+                document.getElementById('categoryName').value = data.categoryName;
+                document.getElementById('categoryName').classList.remove('is-invalid');
+                document.getElementById('categoryModalTitle').innerText = 'កែប្រែប្រភេទ';
+                categoryModal.show();
+            }
+        } catch (error) {
+            Swal.fire('បរាជ័យ!', 'មិនអាចទាញទិន្នន័យសម្រាប់កែប្រែបានទេ។', 'error');
+        }
+    }
+
+    function deleteCategory(id) {
+        Swal.fire({
+            title: 'តើអ្នកពិតជាចង់លុបមែនទេ?',
+            text: "ទិន្នន័យនេះនឹងត្រូវលុបជាអចិន្ត្រៃយ៍!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: '<i class="fas fa-trash"></i> លុបវា!',
+            cancelButtonText: 'បោះបង់'
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    let res = await fetch(`${categoryApiUrl}/${id}`, { method: 'DELETE' });
+                    if (res.ok) {
+                        Swal.fire({ icon: 'success', title: 'បានលុប!', text: 'ទិន្នន័យត្រូវបានលុប។', timer: 1500, showConfirmButton: false });
+                        loadCategories();
+                        loadProducts(); // Load product ម្តងទៀតក្រែងលោមាន Product ពាក់ព័ន្ធត្រូវលុបដែរ
+                    } else {
+                        throw new Error("មិនអាចលុបបាន");
+                    }
+                } catch (error) {
+                    Swal.fire('បរាជ័យ!', 'មិនអាចលុបទិន្នន័យបានទេ ដោយសារមានទិន្នន័យផលិតផលពាក់ព័ន្ធ ឬបញ្ហា Server។', 'error');
+                }
+            }
+        });
+    }
+
+    /* ==============================================
+       ផ្នែក Product (Upgraded Workflow)
+    ============================================== */
+    
+    // បើក Form បញ្ចូលផលិតផល ដោយភ្ជាប់ជាមួយ Category រួចជាស្រេច
+    function openProductModalWithCategory(catId, catName) {
+        document.getElementById('productId').value = '';
+        
+        // កំណត់តម្លៃអោយ Hidden ID និង បង្ហាញឈ្មោះនៅលើ Label
+        document.getElementById('hiddenCategoryID').value = catId;
+        document.getElementById('displayCategoryName').innerText = catName;
+        
+        document.getElementById('productName').value = '';
+        document.getElementById('productPrice').value = '';
+        
+        document.getElementById('productModalTitle').innerText = 'បន្ថែមផលិតផលថ្មី ចូលទៅក្នុងប្រភេទ: ' + catName;
+        
+        document.getElementById('productName').classList.remove('is-invalid');
+        document.getElementById('productPrice').classList.remove('is-invalid');
+        
+        productModal.show();
+    }
+
+    async function loadProducts() {
+        let tbody = document.getElementById('productTableBody');
+        try {
+            let res = await fetch(productApiUrl);
+            if (res.status === 404 || res.status === 204) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-warning fw-bold">មិនមានទិន្នន័យផលិតផលនៅឡើយទេ!</td></tr>`;
+                return;
+            }
+            if (!res.ok) throw new Error("មិនអាចទាញទិន្នន័យពី Server បានទេ");
+
+            let data = await res.json();
+            tbody.innerHTML = '';
+
+            if(data.length === 0){
+                tbody.innerHTML = `<tr><td colspan="5" class="text-muted">ទិន្នន័យទទេ</td></tr>`;
+                return;
+            }
+
+            data.forEach(item => {
+                let priceFormatted = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(item.price);
+                // បង្ហាញ Category ID នៅក្នុងតារាងដើម្បីងាយស្រួលផ្ទៀងផ្ទាត់
+                let catBadge = `<span class="category-badge"><i class="fas fa-tag"></i> ID: ${item.categoryId || 'N/A'}</span>`;
+                
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="fw-bold text-secondary">${item.productId}</td>
+                        <td class="text-start">${item.productName}</td>
+                        <td>${catBadge}</td>
+                        <td class="text-success fw-bold">${priceFormatted}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-warning btn-action" onclick="editProduct(${item.productId})"><i class="fas fa-edit"></i> កែប្រែ</button>
+                            <button class="btn btn-sm btn-outline-danger btn-action" onclick="deleteProduct(${item.productId})"><i class="fas fa-trash"></i> លុប</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        } catch (error) { 
+            tbody.innerHTML = `<tr><td colspan="5" class="text-danger"><i class="fas fa-exclamation-triangle"></i> បញ្ហាការតភ្ជាប់: ${error.message}</td></tr>`;
+        }
+    }
+
+    async function saveProduct() {
+        let id = document.getElementById('productId').value;
+        let catId = document.getElementById('hiddenCategoryID').value; // ទាញយក Category ID ពី Hidden Input
+        let nameInput = document.getElementById('productName');
+        let priceInput = document.getElementById('productPrice');
+        
+        let name = nameInput.value.trim();
+        let price = parseFloat(priceInput.value);
+
+        // Validation Validation
+        let isValid = true;
+        
+        if (!catId) {
+            Swal.fire('បម្រាម!', 'សូមជ្រើសរើសប្រភេទ (Category) ជាមុនសិន ដោយចូលទៅកាន់ Tab ប្រភេទ រួចចុច ➕ ផលិតផល!', 'warning');
+            return;
+        }
+        
+        if (!name) { nameInput.classList.add('is-invalid'); isValid = false; } else { nameInput.classList.remove('is-invalid'); }
+        if (isNaN(price) || price < 0) { priceInput.classList.add('is-invalid'); isValid = false; } else { priceInput.classList.remove('is-invalid'); }
+        
+        if (!isValid) {
+            Swal.fire('បម្រាម!', 'សូមបញ្ចូលទិន្នន័យឲ្យបានត្រឹមត្រូវ!', 'warning');
+            return;
+        }
+
+        toggleButtonLoading('btnSaveProduct', true);
+
+        let method = id ? 'PUT' : 'POST';
+        let url = id ? `${productApiUrl}/${id}` : productApiUrl;
+        
+        // បញ្ចូល CategoryId ទៅក្នុង Payload ដើម្បីផ្ញើទៅកាន់ API
+        let payload = { 
+            productName: name, 
+            price: price,
+            categoryId: parseInt(catId) 
+        };
+        if (id) payload.productId = parseInt(id);
+
+        try {
+            let res = await fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                Swal.fire({ icon: 'success', title: 'ជោគជ័យ!', text: 'ទិន្នន័យផលិតផលត្រូវបានរក្សាទុក', timer: 1500, showConfirmButton: false });
+                productModal.hide();
+                loadProducts();
+                
+                // ប្តូរ Tab ទៅកាន់ Product ដោយស្វ័យប្រវត្តិដើម្បីអោយឃើញលទ្ធផល
+                let productTab = new bootstrap.Tab(document.getElementById('product-tab'));
+                productTab.show();
+            } else {
+                throw new Error("ប្រតិបត្តិការបរាជ័យ");
+            }
+        } catch (error) {
+            Swal.fire('បរាជ័យ!', 'មានបញ្ហាក្នុងការភ្ជាប់ទៅកាន់ Server។', 'error');
+        } finally {
+            toggleButtonLoading('btnSaveProduct', false);
+        }
+    }
+
+    async function editProduct(id) {
+        try {
+            let res = await fetch(`${productApiUrl}/${id}`);
+            if(res.ok){
+                let data = await res.json();
+                document.getElementById('productId').value = data.productId;
+                
+                // កំណត់តម្លៃ CategoryID ចូលទៅក្នុង Hidden Field វិញ
+                document.getElementById('hiddenCategoryID').value = data.categoryId;
+                document.getElementById('displayCategoryName').innerText = `ID ប្រភេទ: ${data.categoryId} (កំពុងកែប្រែ)`;
+                
+                document.getElementById('productName').value = data.productName;
+                document.getElementById('productPrice').value = data.price;
+                
+                document.getElementById('productName').classList.remove('is-invalid');
+                document.getElementById('productPrice').classList.remove('is-invalid');
+                
+                document.getElementById('productModalTitle').innerText = 'កែប្រែផលិតផល';
+                productModal.show();
+            }
+        } catch (error) {
+            Swal.fire('បរាជ័យ!', 'មិនអាចទាញទិន្នន័យសម្រាប់កែប្រែបានទេ។', 'error');
+        }
+    }
+
+    function deleteProduct(id) {
+        Swal.fire({
+            title: 'តើអ្នកពិតជាចង់លុបមែនទេ?',
+            text: "ទិន្នន័យផលិតផលនេះនឹងត្រូវលុបជាអចិន្ត្រៃយ៍!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: '<i class="fas fa-trash"></i> លុបវា!',
+            cancelButtonText: 'បោះបង់'
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    let res = await fetch(`${productApiUrl}/${id}`, { method: 'DELETE' });
+                    if (res.ok) {
+                        Swal.fire({ icon: 'success', title: 'បានលុប!', text: 'ផលិតផលត្រូវបានលុបដោយជោគជ័យ។', timer: 1500, showConfirmButton: false });
+                        loadProducts();
+                    } else {
+                        throw new Error("មិនអាចលុបបាន");
+                    }
+                } catch(error) {
+                    Swal.fire('បរាជ័យ!', 'មិនអាចលុបផលិតផលបានទេ ដោយសារបញ្ហា Server។', 'error');
+                }
+            }
+        });
+    }
+</script>
+
+</body>
+</html>

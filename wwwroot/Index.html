@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SchoolApp - User Management</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f4f7f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .login-container { max-width: 400px; margin: 100px auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .dashboard-container { margin-top: 30px; display: none; }
+        .navbar { box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .table-responsive { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="#">SchoolApp Admin</a>
+            <div class="d-flex" id="navActions" style="display: none !important;">
+                <button class="btn btn-danger" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 1. Login View -->
+    <div class="container" id="loginView">
+        <div class="login-container">
+            <h3 class="text-center mb-4">ចូលប្រព័ន្ធ (Login)</h3>
+            <div id="loginError" class="alert alert-danger d-none"></div>
+            <form id="loginForm" onsubmit="login(event)">
+                <div class="mb-3">
+                    <label>Email</label>
+                    <input type="email" id="email" class="form-control" required placeholder="admin@example.com">
+                </div>
+                <div class="mb-3">
+                    <label>Password</label>
+                    <input type="password" id="password" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 2. Dashboard View (CRUD) -->
+    <div class="container dashboard-container" id="dashboardView">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>គ្រប់គ្រងអ្នកប្រើប្រាស់ (App Users)</h2>
+            <button class="btn btn-success" onclick="showModal()">+ បន្ថែមថ្មី (Create)</button>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Email / UserName</th>
+                        <th class="text-end">សកម្មភាព (Actions)</th>
+                    </tr>
+                </thead>
+                <tbody id="userTableBody">
+                    <!-- ទិន្នន័យនឹងត្រូវបញ្ចូលទីនេះដោយ JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- User Modal (For Create/Edit) -->
+    <div class="modal fade" id="userModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">បន្ថែមអ្នកប្រើប្រាស់</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="userForm">
+                        <input type="hidden" id="userId" value="0">
+                        <div class="mb-3">
+                            <label>UserName</label>
+                            <input type="text" id="txtUserName" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label>Email</label>
+                            <input type="email" id="txtEmail" class="form-control" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">បោះបង់</button>
+                    <button type="button" class="btn btn-primary" onclick="saveUser()">រក្សាទុក</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap & JS Logic -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // កំណត់ Base URL
+        const API_BASE = '/api'; 
+        
+        // ពិនិត្យមើល Token នៅពេលបើកទំព័រ
+        document.addEventListener("DOMContentLoaded", () => {
+            checkAuth();
+        });
+
+        function checkAuth() {
+            const token = localStorage.getItem("jwtToken");
+            if (token) {
+                document.getElementById("loginView").style.display = "none";
+                document.getElementById("dashboardView").style.display = "block";
+                document.getElementById("navActions").style.setProperty("display", "flex", "important");
+                loadUsers(); 
+            } else {
+                document.getElementById("loginView").style.display = "block";
+                document.getElementById("dashboardView").style.display = "none";
+                document.getElementById("navActions").style.setProperty("display", "none", "important");
+            }
+        }
+
+        // ==========================================
+        // 1. Auth Operations
+        // ==========================================
+        async function login(e) {
+            e.preventDefault();
+            alert("ប៊ូតុងដើរហើយ!"); // <--- ថែមបន្ទាត់នេះសាកល្បង
+            e.preventDefault();
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            const errorDiv = document.getElementById("loginError");
+
+            try {
+                const res = await fetch(`${API_BASE}/AuthApi/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    localStorage.setItem("jwtToken", data.token); 
+                    errorDiv.classList.add("d-none");
+                    checkAuth();
+                } else {
+                    const errorText = await res.text();
+                    errorDiv.innerText = `ចូលមិនជោគជ័យ: ${res.status} - ${errorText || "រក API មិនឃើញ (ត្រូវប្រាកដថាបានដាក់ app.MapControllers() ក្នុង Program.cs)"}`;
+                    errorDiv.classList.remove("d-none");
+                }
+            } catch (err) {
+                alert("មានបញ្ហាក្នុងការភ្ជាប់ទៅកាន់ Server: " + err.message);
+                console.error(err);
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem("jwtToken");
+            checkAuth();
+        }
+
+        function getHeaders() {
+            return {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem("jwtToken")}`
+            };
+        }
+
+        // ==========================================
+        // 2. CRUD Operations 
+        // ==========================================
+        let userModal = null;
+        
+        async function loadUsers() {
+            try {
+                const res = await fetch(`${API_BASE}/AppUserApi`, { headers: getHeaders() });
+                if (res.status === 401) return logout(); 
+                
+                const users = await res.json();
+                const tbody = document.getElementById("userTableBody");
+                tbody.innerHTML = "";
+
+                users.forEach(u => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${u.id}</td>
+                            <td>${u.userName} <br><small class="text-muted">${u.email}</small></td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-warning" onclick="editUser('${u.id}')">Edit</button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteUser('${u.id}')">Delete</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } catch (err) { console.error("Error loading users", err); }
+        }
+
+        function showModal(isEdit = false) {
+            if(!userModal) userModal = new bootstrap.Modal(document.getElementById('userModal'));
+            document.getElementById("modalTitle").innerText = isEdit ? "កែប្រែព័ត៌មាន" : "បន្ថែមអ្នកប្រើប្រាស់";
+            if (!isEdit) {
+                document.getElementById("userForm").reset();
+                document.getElementById("userId").value = "0";
+            }
+            userModal.show();
+        }
+
+        async function editUser(id) {
+            const res = await fetch(`${API_BASE}/AppUserApi/${id}`, { headers: getHeaders() }); 
+            if (res.ok) {
+                const user = await res.json();
+                document.getElementById("userId").value = user.id;
+                document.getElementById("txtUserName").value = user.userName;
+                document.getElementById("txtEmail").value = user.email;
+                showModal(true);
+            }
+        }
+
+        async function saveUser() {
+            const id = document.getElementById("userId").value;
+            const user = {
+                id: id === "0" ? 0 : id,
+                userName: document.getElementById("txtUserName").value,
+                email: document.getElementById("txtEmail").value
+            };
+
+            const method = id === "0" ? "POST" : "PUT";
+            const url = id === "0" ? `${API_BASE}/AppUserApi` : `${API_BASE}/AppUserApi/${id}`; 
+
+            const res = await fetch(url, {
+                method: method,
+                headers: getHeaders(),
+                body: JSON.stringify(user)
+            });
+
+            if (res.ok) {
+                userModal.hide();
+                loadUsers();
+            } else {
+                alert("មានបញ្ហាក្នុងការរក្សាទុក! (សូមពិនិត្យមើលសិទ្ធិ Admin)");
+            }
+        }
+
+        async function deleteUser(id) {
+            if (confirm("តើអ្នកពិតជាចង់លុបទិន្នន័យនេះមែនទេ?")) {
+                const res = await fetch(`${API_BASE}/AppUserApi/${id}`, { 
+                    method: 'DELETE',
+                    headers: getHeaders()
+                });
+
+                if (res.ok) {
+                    loadUsers();
+                } else {
+                    alert("មានបញ្ហាក្នុងការលុប! (សូមពិនិត្យមើលសិទ្ធិ Admin)");
+                }
+            }
+        }
+    </script>
+</body>
+</html>

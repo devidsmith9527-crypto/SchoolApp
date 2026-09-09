@@ -1,0 +1,40 @@
+@{
+    ViewData["Title"] = "Index";
+    Layout = "_Layout";
+}
+
+@using Microsoft.AspNetCore.Identity
+@model IEnumerable<SchoolApp.Models.AppUser>
+@inject SignInManager<IdentityUser> SignInManager
+
+<div class="d-flex justify-content-between my-3">
+    <h2>បញ្ជីអ្នកប្រើប្រាស់ (EF Core Code-First)</h2>
+    @if (SignInManager.IsSignedIn(User) && User.IsInRole("Admin")) {
+        <a asp-action="Create" class="btn btn-primary">បង្កើតថ្មី</a>
+    }
+</div>
+
+<table class="table table-bordered table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th>ឈ្មោះពេញ</th><th>អាសយដ្ឋាន Email</th><th>ស្ថានភាព</th><th>សកម្មភាព</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var u in Model) {
+        <tr>
+            <td>@u.FullName</td>
+            <td>@u.Email</td>
+            <td>@(u.IsActive ? "សកម្ម" : "អសកម្ម")</td>
+            <td>
+                @if (User.IsInRole("Admin")) {
+                    <a asp-action="Edit" asp-route-id="@u.Id" class="btn btn-sm btn-warning">កែប្រែ</a>
+                    <form asp-action="Delete" asp-route-id="@u.Id" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('លុប?')">លុប</button>
+                    </form>
+                }
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
